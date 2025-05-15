@@ -333,8 +333,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          side:
-              const BorderSide(color: Color(0xFF1E293B), width: 1),
+          side: const BorderSide(color: Color(0xFF1E293B), width: 1),
         ),
       ),
       buttonTheme: const ButtonThemeData(
@@ -492,12 +491,13 @@ class AppTheme {
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          side:
-              const BorderSide(color: Color(0xFF1E293B), width: 1), // Slate-800
+          side: const BorderSide(
+            color: Color(0xFF1E293B),
+            width: 1,
+          ),
         ),
         textStyle: textTheme.bodyMedium,
       ),
     );
   }
 }
-

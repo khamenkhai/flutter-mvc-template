@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:project_frame/core/component/scale_on_tap.dart';
 import 'package:project_frame/core/const/app_colors.dart';
 import 'package:project_frame/core/local_data/shared_prefs.dart';
-import 'package:project_frame/core/utils/context_extension.dart';
 import 'package:project_frame/core/utils/custom_logger.dart';
 import 'package:get_it/get_it.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -16,8 +16,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+  
   SharedPref sharedPref = GetIt.instance<SharedPref>();
 
   String value = "";
@@ -51,22 +52,15 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Center(
             child: ElevatedButton(
-              onPressed: () {},
-              child: Text("Testing"),
+              onPressed: () {
+                context.push('/about');
+              },
+              child: Text("About Page"),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(),
-            padding: EdgeInsets.symmetric(
-              horizontal: 15,
-              vertical: 15,
-            ),
-            child: TextField(),
-          ),
-          Text(
-            "Hello world",
-            style: context.smallFont(),
-          )
+          // Expanded(
+          //   child: _smartRefreshTesting(),
+          // ),
         ],
       ),
     );
@@ -115,6 +109,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-
 }

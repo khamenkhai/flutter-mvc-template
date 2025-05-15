@@ -11,10 +11,12 @@ class ThemeCubit extends Cubit<ThemeState> {
   String? _cachedFontFamily; // Cache the fontFamily
 
   ThemeCubit({required this.sharedPref})
-      : super(ThemeState(
-          theme: AppTheme.light(fontFamily: "Outfit"),
-          fontFamily: "Outfit", // Initialize with default fontFamily
-        )) {
+      : super(
+          ThemeState(
+            theme: AppTheme.light(fontFamily: "Outfit"),
+            fontFamily: "Outfit",
+          ),
+        ) {
     _loadTheme();
   }
 
@@ -25,10 +27,12 @@ class ThemeCubit extends Cubit<ThemeState> {
 
     if (savedTheme == "dark") {
       _cachedDarkTheme ??= AppTheme.dark(fontFamily: _cachedFontFamily!);
-      emit(ThemeState(theme: _cachedDarkTheme!, fontFamily: _cachedFontFamily!));
+      emit(
+          ThemeState(theme: _cachedDarkTheme!, fontFamily: _cachedFontFamily!),);
     } else {
       _cachedLightTheme ??= AppTheme.light(fontFamily: _cachedFontFamily!);
-      emit(ThemeState(theme: _cachedLightTheme!, fontFamily: _cachedFontFamily!));
+      emit(ThemeState(
+          theme: _cachedLightTheme!, fontFamily: _cachedFontFamily!));
     }
   }
 
@@ -39,11 +43,13 @@ class ThemeCubit extends Cubit<ThemeState> {
 
     if (currentTheme.brightness == Brightness.light) {
       _cachedDarkTheme ??= AppTheme.dark(fontFamily: _cachedFontFamily!);
-      emit(ThemeState(theme: _cachedDarkTheme!, fontFamily: _cachedFontFamily!));
+      emit(
+          ThemeState(theme: _cachedDarkTheme!, fontFamily: _cachedFontFamily!));
       newTheme = "dark";
     } else {
       _cachedLightTheme ??= AppTheme.light(fontFamily: _cachedFontFamily!);
-      emit(ThemeState(theme: _cachedLightTheme!, fontFamily: _cachedFontFamily!));
+      emit(ThemeState(
+          theme: _cachedLightTheme!, fontFamily: _cachedFontFamily!));
       newTheme = "light";
     }
 

@@ -6,8 +6,8 @@ import 'package:project_frame/controller/auth_cubit/auth_cubit.dart';
 import 'package:project_frame/controller/internet_cubit/internet_connection_cubit.dart';
 import 'package:project_frame/controller/theme_cubit/theme_cubit.dart';
 import 'package:project_frame/core/const/global_const.dart';
+import 'package:project_frame/core/router/app_router.dart';
 import 'package:project_frame/injection_container.dart' as ic;
-import 'package:project_frame/view/home/home.dart';
 
 /// main app
 class MyApp extends StatefulWidget {
@@ -33,21 +33,21 @@ class _MyAppState extends State<MyApp> {
 
     return MultiBlocProvider(
       providers: [
-        ///initialize all the providers
+        /// initialize all the providers
         BlocProvider(create: (context) => ic.getIt<AuthCubit>()..checkLoginStatus()),
         BlocProvider(create: (context) => ic.getIt<ThemeCubit>()),
         BlocProvider(create: (context) => ic.getIt<InternetConnectionCubit>()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
-          return MaterialApp(
+          return MaterialApp.router(
             title: GlobalConst.appName,
             theme: themeState.theme,
             debugShowCheckedModeBanner: false,
             locale: context.locale,
             supportedLocales: context.supportedLocales,
             localizationsDelegates: context.localizationDelegates,
-            home: const HomeScreen(),
+            routerConfig: appRouter,
           );
         },
       ),

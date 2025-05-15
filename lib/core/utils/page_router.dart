@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AppNavigator {
+class CustomNavigator {
   /// Pushes a new page with default transition
   static Future<T?> pushPage<T extends Object?>(
       BuildContext context, Widget page) {

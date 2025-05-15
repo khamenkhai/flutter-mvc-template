@@ -58,7 +58,6 @@ Future<void> initGetIt() async {
           error: true,
           compact: true,
           maxWidth: 90,
-          
         ),
       );
     }
