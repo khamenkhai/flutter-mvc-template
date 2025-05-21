@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:project_frame/core/component/scale_on_tap.dart';
-import 'package:project_frame/core/const/app_colors.dart';
-import 'package:project_frame/core/local_data/shared_prefs.dart';
-import 'package:project_frame/core/utils/custom_logger.dart';
-import 'package:get_it/get_it.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
+import 'package:project_frame/view/theme/swith_theme.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,97 +10,60 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  final RefreshController _refreshController = RefreshController(initialRefresh: false);
-  
-  SharedPref sharedPref = GetIt.instance<SharedPref>();
-
-  String value = "";
-
-  @override
-  void initState() {
-    super.initState();
-    init();
-  }
-
-  Future<void> init() async {
-    value = await sharedPref.getString(key: "abc");
-    setState(() {});
-  }
-
-  void _onRefresh() async {
-    // Simulate a network call or data fetch
-    await Future.delayed(const Duration(seconds: 3));
-
-    // Complete the refresh
-    _refreshController.refreshCompleted();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Flutter Frame"),
+        actions: [
+          ThemeSwitch()
+        ],
       ),
-      body: Column(
-        children: [
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                context.push('/about');
-              },
-              child: Text("About Page"),
-            ),
-          ),
-          // Expanded(
-          //   child: _smartRefreshTesting(),
-          // ),
+      body: ScreenTypeLayout.builder(
+        mobile: (context) => _buildMobileLayout(),
+        tablet: (context) => _buildTabletLayout(),
+        desktop: (context) => _buildDesktopLayout(),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.phone_android, size: 60),
+          SizedBox(height: 16),
+          Text("Mobile Layout", style: TextStyle(fontSize: 20)),
         ],
       ),
     );
   }
 
-  // ignore: unused_element
-  SmartRefresher _smartRefreshTesting() {
-    return SmartRefresher(
-      controller: _refreshController,
-      onRefresh: _onRefresh,
-      header: ClassicHeader(
-        refreshingIcon: LoadingAnimationWidget.threeRotatingDots(
-          size: 24,
-          color: AppColors.primary,
-        ),
+  Widget _buildTabletLayout() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.tablet, size: 80),
+          SizedBox(height: 16),
+          Text("Tablet Layout", style: TextStyle(fontSize: 24)),
+        ],
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            ScaleOnTap(
-              onTap: () {
-                CustomLogger logger = GetIt.instance<CustomLogger>();
-                logger.log('message');
-              },
-              child: Container(
-                margin: const EdgeInsets.all(20),
-                width: double.infinity,
-                height: 300,
-                color: Colors.red,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(20),
-              width: double.infinity,
-              height: 300,
-              color: Colors.yellow,
-            ),
-            Container(
-              margin: const EdgeInsets.all(20),
-              width: double.infinity,
-              height: 300,
-              color: Colors.green,
-            ),
-          ],
-        ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.desktop_windows, size: 100),
+          SizedBox(height: 16),
+          Text("Desktop Layout", style: TextStyle(fontSize: 28)),
+        ],
       ),
     );
   }
 }
+

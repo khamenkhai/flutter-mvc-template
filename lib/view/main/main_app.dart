@@ -43,6 +43,7 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp.router(
             title: GlobalConst.appName,
             theme: themeState.theme,
+            themeMode: themeState.themeMode,
             debugShowCheckedModeBanner: false,
             locale: context.locale,
             supportedLocales: context.supportedLocales,
