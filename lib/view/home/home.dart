@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project_frame/core/component/custom_error_widget.dart';
+import 'package:project_frame/core/component/internet_error.dart';
+import 'package:project_frame/core/component/loading_widget.dart';
 import 'package:project_frame/view/theme/swith_theme.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -54,13 +57,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDesktopLayout() {
-    return Center(
+    return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children:  [
           Icon(Icons.desktop_windows, size: 100),
           SizedBox(height: 16),
           Text("Desktop Layout", style: TextStyle(fontSize: 28)),
+          Card(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Text("Hello world!"),
+                  Text("How are you!"),
+                ],
+              ),
+            ),
+          ),
+          CustomErrorWidget(errorText: "errorText"),
+          InternetErrorWidget(),
+          LoadingWidget(radius: 33),
         ],
       ),
     );

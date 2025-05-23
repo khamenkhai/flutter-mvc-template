@@ -4,11 +4,15 @@ import 'package:project_frame/controller/internet_cubit/internet_connection_cubi
 import 'package:project_frame/core/component/internet_error.dart';
 import 'package:project_frame/core/component/loading_widget.dart';
 
-class InternetCheckWidget extends StatelessWidget {
-  const InternetCheckWidget({super.key, required this.child,required this.onRefresh});
+class ConnectionAwareWidget extends StatelessWidget {
+  const ConnectionAwareWidget({
+    super.key,
+    required this.child,
+    required this.onRefresh,
+  });
+
   final Widget child;
   final VoidCallback onRefresh;
-  
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +20,17 @@ class InternetCheckWidget extends StatelessWidget {
       listener: (context, state) {
         if (state is InternetConnectedState) {
           onRefresh();
-        } else {}
+        }
       },
       builder: (context, state) {
         if (state is InternetConnectedState) {
           return child;
         } else if (state is InternetDisconnectedState) {
-          return const Center(child: InternetErrorWidget());
+          return Center(child: InternetErrorWidget(onRetry: onRefresh));
         } else if (state is InternetLoadingState) {
           return const LoadingWidget();
         } else {
-          return Container();
+          return const SizedBox.shrink();
         }
       },
     );

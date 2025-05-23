@@ -11,7 +11,7 @@ analyzer:
   errors:
     depend_on_referenced_packages: ignore
     constant_identifier_names: ignore
-include: package:flutter_lints/flutter.yaml
+# include: package:flutter_lints/flutter.yaml
 
 linter:
   # The lint rules applied to this project can be customized in the

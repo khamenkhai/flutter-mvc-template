@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:project_frame/core/utils/context_extension.dart';
 
 class LoadingWidget extends StatelessWidget {
@@ -8,9 +9,9 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoActivityIndicator(
+    return LoadingAnimationWidget.threeRotatingDots(
       color: color ?? context.primaryColor,
-      radius: radius,
+      size: radius,
     );
   }
 }
