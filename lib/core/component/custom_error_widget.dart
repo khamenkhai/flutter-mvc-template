@@ -12,7 +12,7 @@ class CustomErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
@@ -21,11 +21,11 @@ class CustomErrorWidget extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            color: theme.cardColor, 
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(20),
-           boxShadow: [
+          boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha : 0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -45,7 +45,7 @@ class CustomErrorWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Oops! Something went wrong',
-               style: textTheme.titleMedium?.copyWith(
+              style: textTheme.titleMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,

@@ -15,8 +15,35 @@ class DioClient {
     return {'Authorization': 'Bearer $token'};
   }
 
+  /// GET Request - fixed version
+  Future<Response<T>> getRequest<T>({
+    required String apiUrl,
+    Map<String, String>? queryParams,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final defaultHeaders = await _getHeaders();
+      return await dio.get<T>(
+        apiUrl,
+        queryParameters: queryParams, // Correct place for query params
+        options: Options(
+          headers: {
+            ...defaultHeaders,
+            ...?headers
+          }, // Merge default and custom headers
+          receiveDataWhenStatusError: true,
+          validateStatus: (status) => true,
+        ),
+      );
+    } on DioException catch (e) {
+      throw Exception(e);
+    }
+  }
+
+
+
   /// GET Request with Cache Interceptor
-  Future<Response<T>> getRequest<T>({required String apiUrl}) async {
+  Future<Response<T>> getRequest2<T>({required String apiUrl}) async {
     try {
       final headers = await _getHeaders();
       DioCacheInterceptor dioCacheInterceptor = DioCacheInterceptor(
