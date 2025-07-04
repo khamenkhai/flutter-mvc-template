@@ -65,6 +65,7 @@ class CustomErrorWidget extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
                 style: ElevatedButton.styleFrom(
+                  iconColor: Colors.white,
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.redAccent,
                   shape: RoundedRectangleBorder(

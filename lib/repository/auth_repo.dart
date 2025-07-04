@@ -81,7 +81,7 @@ class AuthRepository {
     required Map<String, dynamic> requestBody,
   }) async {
     return await _postRequest(
-      apiUrl: ApiConstants.REGISTER,
+      apiUrl: ApiConst.REGISTER,
       requestBody: requestBody,
     );
   }
@@ -91,20 +91,20 @@ class AuthRepository {
     required Map<String, dynamic> requestBody,
   }) async {
     return await _postRequest(
-      apiUrl: ApiConstants.LOGIN,
+      apiUrl: ApiConst.LOGIN,
       requestBody: requestBody,
     );
   }
 
   /// Logout
   Future<Either<String, UserResponseModel>> logout() async {
-    return await _postRequest(apiUrl: ApiConstants.LOGOUT, requestBody: {});
+    return await _postRequest(apiUrl: ApiConst.LOGOUT, requestBody: {});
   }
 
   /// Delete
   Future<Either<String, UserResponseModel>> delete(
       {required String userId}) async {
-    return await _deleteRequest(apiUrl: ApiConstants.DELETE_ACCOUNT);
+    return await _deleteRequest(apiUrl: ApiConst.DELETE_ACCOUNT);
   }
 
   /// Check Login Status
@@ -118,7 +118,7 @@ class AuthRepository {
   Future<Either<String, bool>> forgetPassword(
       {required String phoneNumber}) async {
     final response = await _postRequest(
-      apiUrl: ApiConstants.FORGET_PASSWORD,
+      apiUrl: ApiConst.FORGET_PASSWORD,
       requestBody: {"phone": phoneNumber},
     );
     return response.map((user) => user.status);
@@ -128,7 +128,7 @@ class AuthRepository {
   Future<Either<String, UserResponseModel>> getOTPtoRegister(
       {required String phoneNumber}) async {
     return await _postRequest(
-      apiUrl: ApiConstants.GET_OTP,
+      apiUrl: ApiConst.GET_OTP,
       requestBody: {"phone": phoneNumber},
     );
   }
@@ -136,7 +136,7 @@ class AuthRepository {
   /// Resend OTP
   Future<Either<String, bool>> resendOTP({required String phoneNumber}) async {
     final response = await _postRequest(
-      apiUrl: ApiConstants.RESEND_OTP,
+      apiUrl: ApiConst.RESEND_OTP,
       requestBody: {"phone": phoneNumber},
     );
     return response.map((user) => user.status);
@@ -148,7 +148,7 @@ class AuthRepository {
     required String code,
   }) async {
     final response = await _postRequest(
-      apiUrl: ApiConstants.VERIFY_OTP,
+      apiUrl: ApiConst.VERIFY_OTP,
       requestBody: {
         "phone": phoneNumber,
         "code": code,
@@ -163,7 +163,7 @@ class AuthRepository {
     required String newPassword,
   }) async {
     return await _postRequest(
-      apiUrl: ApiConstants.RESET_PASSWORD,
+      apiUrl: ApiConst.RESET_PASSWORD,
       requestBody: {
         "phone": phoneNumber,
         "new_password": newPassword,
@@ -177,7 +177,7 @@ class AuthRepository {
     required String oldPassword,
   }) async {
     return await _postRequest(
-      apiUrl: ApiConstants.CHANGE_PASSWORD,
+      apiUrl: ApiConst.CHANGE_PASSWORD,
       requestBody: {
         "old_password": oldPassword,
         "new_password": newPassword,
