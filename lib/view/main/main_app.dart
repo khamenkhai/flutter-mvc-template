@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project_frame/controller/auth_cubit/auth_cubit.dart';
 import 'package:project_frame/controller/internet_cubit/internet_connection_cubit.dart';
+import 'package:project_frame/controller/products_cubit/products_cubit.dart';
 import 'package:project_frame/controller/theme_cubit/theme_cubit.dart';
 import 'package:project_frame/core/const/global_const.dart';
 import 'package:project_frame/core/router/app_router.dart';
@@ -37,6 +38,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (context) => ic.getIt<AuthCubit>()..checkLoginStatus()),
         BlocProvider(create: (context) => ic.getIt<ThemeCubit>()),
         BlocProvider(create: (context) => ic.getIt<InternetConnectionCubit>()),
+        BlocProvider(create: (context) => ic.getIt<ProductsCubit>()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
