@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:project_frame/controller/category_cubit/category_cubit.dart';
 import 'package:project_frame/controller/products_cubit/products_cubit.dart';
 import 'package:project_frame/core/const/api_const.dart';
 import 'package:project_frame/core/network/dio_client.dart';
@@ -12,6 +13,7 @@ import 'package:project_frame/core/local_data/shared_prefs.dart';
 import 'package:project_frame/repository/auth_repo.dart';
 import 'package:project_frame/core/utils/custom_logger.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:project_frame/repository/categories_repo.dart';
 import 'package:project_frame/repository/products_repo.dart';
 
 final getIt = GetIt.instance;
@@ -21,6 +23,7 @@ Future<void> initGetIt() async {
   getIt.registerFactory(() => InternetConnectionCubit());
   getIt.registerFactory(() => ThemeCubit(sharedPref: getIt.call()));
   getIt.registerFactory(() => ProductsCubit(productRepo: getIt.call()));
+  getIt.registerFactory(() => CategoryCubit(categoryRepo: getIt.call()));
   getIt.registerFactory(
       () => AuthCubit(authRepository: getIt.call(), sharedPref: getIt.call()));
 
@@ -29,6 +32,8 @@ Future<void> initGetIt() async {
       () => AuthRepository(dio: getIt.call(), logService: getIt.call()));
   getIt.registerLazySingleton(
       () => ProductsRepo(dioClient: getIt.call(), logger: getIt.call()));
+  getIt.registerLazySingleton(
+      () => CategoryRepository(dioClient: getIt.call(), logger: getIt.call()));
 
   /// Network client
   getIt.registerLazySingleton(

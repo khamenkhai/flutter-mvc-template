@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:project_frame/core/local_data/shared_prefs.dart';
+import 'package:project_frame/core/utils/exception.dart';
 
 class DioClient {
-  
   final SharedPref sharedPref;
   final Dio dio;
 
@@ -15,125 +14,169 @@ class DioClient {
     return {'Authorization': 'Bearer $token'};
   }
 
-  /// GET Request - fixed version
-  Future<Response<T>> getRequest<T>({
+  /// Handle the response and throw appropriate exceptions
+  T _handleResponse<T>(Response<T> response) {
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      return response.data!;
+    } else {
+      final errorMessage = _getErrorMessage(response);
+
+      switch (response.statusCode) {
+        case 401:
+          throw UnauthorizedException(errorMessage);
+        case 404:
+          throw NotFoundException(errorMessage);
+        case 500:
+          throw ServerErrorException(errorMessage);
+        default:
+          throw ApiException(errorMessage, response.statusCode);
+      }
+    }
+  }
+
+  /// Extract error message from response
+  String _getErrorMessage(Response response) {
+    try {
+      if (response.data is Map && response.data['message'] != null) {
+        return response.data['message'];
+      }
+      final message = response.statusMessage ?? 'Unknown error occurred';
+
+      if (response.statusCode == 404) {
+        return "Url not found!";
+      }
+
+      if (message.isEmpty) {
+        return "Unknow error occured!";
+      }
+
+      return message;
+    } catch (e) {
+      return 'Failed to parse error message';
+    }
+  }
+
+  /// GET Request
+  Future<T> getRequest<T>({
     required String apiUrl,
     Map<String, String>? queryParams,
     Map<String, String>? headers,
   }) async {
     try {
       final defaultHeaders = await _getHeaders();
-      return await dio.get<T>(
+      final response = await dio.get<T>(
         apiUrl,
-        queryParameters: queryParams, // Correct place for query params
+        queryParameters: queryParams,
         options: Options(
           headers: {
             ...defaultHeaders,
-            ...?headers
-          }, // Merge default and custom headers
+            ...?headers,
+          },
           receiveDataWhenStatusError: true,
-          validateStatus: (status) => true,
         ),
       );
+      return _handleResponse(response);
     } on DioException catch (e) {
-      throw Exception(e);
-    }
-  }
-
-
-
-  /// GET Request with Cache Interceptor
-  Future<Response<T>> getRequest2<T>({required String apiUrl}) async {
-    try {
-      final headers = await _getHeaders();
-      DioCacheInterceptor dioCacheInterceptor = DioCacheInterceptor(
-        options: CacheOptions(
-          store: MemCacheStore(),
-        ),
-      );
-      dio.interceptors.add(dioCacheInterceptor);
-      return await dio.get<T>(
-        apiUrl,
-        options: Options(
-          headers: headers,
-          receiveDataWhenStatusError: true,
-          validateStatus: (status) => true,
-        ),
-      );
-    } on DioException catch (e) {
-      throw Exception(e);
+      if (e.response != null) {
+        throw ApiException(
+            _getErrorMessage(e.response!), e.response?.statusCode);
+      }
+      throw ApiException(e.message ?? 'Network error occurred');
     }
   }
 
   /// POST Request
-  Future<Response<T>> postRequest<T>({
+  Future<T> postRequest<T>({
     required String apiUrl,
     required Map<String, dynamic> requestBody,
   }) async {
     try {
       final headers = await _getHeaders();
-      return await dio.post<T>(
+      final response = await dio.post<T>(
         apiUrl,
         data: requestBody,
         options: Options(
           headers: headers,
           receiveDataWhenStatusError: true,
-          validateStatus: (status) => true,
         ),
       );
+      return _handleResponse(response);
     } on DioException catch (e) {
-      throw Exception(e);
+      if (e.response != null) {
+        throw ApiException(
+            _getErrorMessage(e.response!), e.response?.statusCode);
+      }
+      throw ApiException(e.message ?? 'Network error occurred');
     }
   }
 
   /// POST Request with Custom Header
-  Future<Response<T>> postRequestWithCustomHeader<T>({
+  Future<T> postRequestWithCustomHeader<T>({
     required String apiUrl,
     required Map<String, dynamic> requestBody,
     required Map<String, dynamic> header,
   }) async {
     try {
-      return await dio.post<T>(
+      final response = await dio.post<T>(
         apiUrl,
         data: requestBody,
         options: Options(headers: header),
       );
+      return _handleResponse(response);
     } on DioException catch (e) {
-      throw Exception(e);
+      if (e.response != null) {
+        throw ApiException(
+            _getErrorMessage(e.response!), e.response?.statusCode);
+      }
+      throw ApiException(e.message ?? 'Network error occurred');
     }
   }
 
   /// DELETE Request
-  Future<Response<T>> deleteRequest<T>({
+  Future<T> deleteRequest<T>({
     required String apiUrl,
     required Map<String, dynamic> requestBody,
   }) async {
     try {
       final headers = await _getHeaders();
-      return await dio.delete<T>(
+      final response = await dio.delete<T>(
         apiUrl,
         data: requestBody,
         options: Options(headers: headers),
       );
+      return _handleResponse(response);
     } on DioException catch (e) {
-      throw Exception(e);
+      if (e.response != null) {
+        throw ApiException(
+          _getErrorMessage(e.response!),
+          e.response?.statusCode,
+        );
+      }
+      throw ApiException(e.message ?? 'Network error occurred');
     }
   }
 
   /// PUT Request
-  Future<Response<T>> putRequest<T>({
+  Future<T> putRequest<T>({
     required String apiUrl,
     required Map<String, dynamic> requestBody,
   }) async {
     try {
       final headers = await _getHeaders();
-      return await dio.put<T>(
+      final response = await dio.put<T>(
         apiUrl,
         data: requestBody,
         options: Options(headers: headers),
       );
+      return _handleResponse(response);
     } on DioException catch (e) {
-      throw Exception(e);
+      if (e.response != null) {
+        throw ApiException(
+          _getErrorMessage(e.response!),
+          e.response?.statusCode,
+        );
+      }
+      throw ApiException(e.message ?? 'Network error occurred');
     }
   }
 }

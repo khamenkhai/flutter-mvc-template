@@ -16,7 +16,7 @@ class CategoryCubit extends Cubit<CategoryState> {
 
     try {
       final result = await categoryRepo.getAllCategories(
-        queryParams: {"language_code": languageCode},
+        queryParams: {},
       );
 
       result.fold(

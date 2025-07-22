@@ -2,9 +2,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:project_frame/core/const/api_const.dart';
 import 'package:project_frame/core/network/dio_client.dart';
 import 'package:project_frame/core/utils/custom_logger.dart';
+import 'package:project_frame/core/utils/exception.dart';
 import 'package:project_frame/models/response_models/product_model.dart';
 
 class ProductsRepo {
+  
   final DioClient dioClient;
   final CustomLogger logger;
 
@@ -19,22 +21,17 @@ class ProductsRepo {
     required Map<String, dynamic> requestBody,
   }) async {
     try {
-      final response = await dioClient.postRequest(
+      final data = await dioClient.postRequest<List<dynamic>>(
         apiUrl: "${ApiConst.productsByCategory}/$categoryId",
         requestBody: requestBody,
       );
-
-      if (response.statusCode == 200) {
-        var dataList = response.data as List;
-        return Right(dataList.map((e) => ProductModel.fromJson(e)).toList());
-      } else {
-        return Left(response.data["message"] ?? "Failed to load products");
-      }
+      return Right(data.map((e) => ProductModel.fromJson(e)).toList());
+    } on ApiException catch (e) {
+      logger.log("ProductsRepo : getProductsByCategory': $e");
+      return Left(e.message);
     } catch (e) {
-      logger.log(
-        "ProductsRepo : getProductsByCategory': $e",
-      );
-      return Left("Something went wrong: $e");
+      logger.log("ProductsRepo : getProductsByCategory': $e");
+      return Left("Something went wrong");
     }
   }
 
@@ -43,23 +40,33 @@ class ProductsRepo {
     required Map<String, String> queryParams,
   }) async {
     try {
-      final response = await dioClient.getRequest(
+      final data = await dioClient.getRequest<List<dynamic>>(
         apiUrl: ApiConst.allProducts,
         queryParams: queryParams,
       );
-
-      if (response.statusCode == 200) {
-        var dataList = response.data as List;
-        return Right(dataList.map((e) => ProductModel.fromJson(e)).toList());
-      } else {
-        return Left(response.data["message"] ?? "Failed to load products");
-      }
+      return Right(data.map((e) => ProductModel.fromJson(e)).toList());
+    } on ApiException catch (e) {
+      logger.logWarning("Error log : $e",
+          error: 'ProductsRepo : getAllProducts');
+      return Left(e.message);
     } catch (e) {
-      logger.logWarning(
-        "Error log : $e",
-        error: 'ProductsRepo : getAllProducts',
+      logger.logWarning("Error log : $e",
+          error: 'ProductsRepo : getAllProducts');
+      return Left("Something went wrong");
+    }
+  }
+
+  /// Get all products (GET)
+  Future<Either<String, List<ProductModel>>> getErrors() async {
+    try {
+      final data = await dioClient.getRequest(
+        apiUrl: ApiConst.error,
       );
-      return Left("Something went wrong: $e");
+      return Right(data.map((e) => ProductModel.fromJson(e)).toList());
+    } catch (e) {
+      logger.logWarning("Error log : $e",
+          error: 'ProductsRepo : getAllProducts');
+      return Left(e.toString());
     }
   }
 }

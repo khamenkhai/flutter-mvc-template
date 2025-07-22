@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 @immutable
 sealed class ApiConst {
   // Base URL for different environments
+  // static const String BASE_URL_DEV = "http://192.168.50.21:8000";
   static const String BASE_URL_DEV = "https://fakestoreapi.com";
   static const String BASE_URL_STAGING = "https://staging-api.example.com";
   static const String BASE_URL_PROD = "https://api.example.com";
@@ -26,6 +27,9 @@ sealed class ApiConst {
   /// Products API paths
   static const String allProducts = "/products";
   static const String productsByCategory = "/categories";
+
+
+  static const String error = "/error";
 
   // Timeout settings for network calls
   static const int TIMEOUT_DURATION_IN_SECONDS = 30;

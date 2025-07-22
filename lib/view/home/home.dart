@@ -1,5 +1,7 @@
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project_frame/controller/category_cubit/category_cubit.dart';
 import 'package:project_frame/controller/products_cubit/products_cubit.dart';
 import 'package:project_frame/core/component/custom_error_widget.dart';
 import 'package:project_frame/models/response_models/product_model.dart';
@@ -37,12 +39,16 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black87),
-            onPressed: () {},
+            onPressed: () {
+                context.read<ProductsCubit>().testError();
+            },
           ),
           IconButton(
             icon:
                 const Icon(Icons.shopping_bag_outlined, color: Colors.black87),
-            onPressed: () {},
+            onPressed: () {
+              context.read<CategoryCubit>().getAllCategories(languageCode: "en");
+            },
           ),
         ],
       ),
@@ -89,24 +95,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductGrid(List<ProductModel> products) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Responsive grid columns
-        final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
+      final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
+      final cardPadding = _getCardPadding(constraints.maxWidth);
+      final aspectRatio = _getAspectRatio(constraints.maxWidth);
 
-        // Responsive padding based on screen width
-        final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
-        final cardPadding = _getCardPadding(constraints.maxWidth);
+      return Container(
+        margin: EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: horizontalPadding,
+        ),
+        child: CustomRefreshIndicator(
+          onRefresh: () async {
+             context.read<ProductsCubit>().getAllProducts(isRefresh: true);
+          },
+          builder: (BuildContext context, Widget child, IndicatorController controller) {
+            return Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                // Your GridView
+                child,
 
-        // Responsive aspect ratio
-        final aspectRatio = _getAspectRatio(constraints.maxWidth);
-
-        return Container(
-          margin: EdgeInsets.symmetric(
-            vertical: 16,
-            horizontal: horizontalPadding,
-          ),
+                // Refresh indicator
+                if (controller.isDragging || controller.isArmed)
+                  Positioned(
+                    top: 10,
+                    child: AnimatedBuilder(
+                      animation: controller,
+                      builder: (context, _) {
+                        return Transform.rotate(
+                          angle: controller.value * 2 * 3.14,
+                          child: const Icon(Icons.refresh, size: 28),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            );
+          },
           child: GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 16,
@@ -121,10 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   // Helper methods for responsive values
   int _getCrossAxisCount(double screenWidth) {

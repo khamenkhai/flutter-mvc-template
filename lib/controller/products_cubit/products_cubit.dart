@@ -49,4 +49,21 @@ class ProductsCubit extends Cubit<ProductsState> {
       emit(ProductsErrorState(error: 'getAllProducts : $e'));
     }
   }
+
+  
+  /// get all products
+  void testError() async {
+    emit(ProductsLoadingState());
+
+    try {
+      final result = await productRepo.getErrors();
+
+      result.fold(
+        (error) => emit(ProductsErrorState(error: error)),
+        (products) => emit(ProductsLoadedState(products: products)),
+      );
+    } catch (e) {
+      emit(ProductsErrorState(error: 'testError : $e'));
+    }
+  }
 }
