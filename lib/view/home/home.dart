@@ -1,10 +1,11 @@
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_frame/controller/category_cubit/category_cubit.dart';
-import 'package:project_frame/controller/products_cubit/products_cubit.dart';
+import 'package:get/get.dart';
+import 'package:project_frame/controller/product_controller.dart';
 import 'package:project_frame/core/component/custom_error_widget.dart';
+import 'package:project_frame/core/utils/context_extension.dart';
 import 'package:project_frame/models/response_models/product_model.dart';
+import 'package:project_frame/view/theme/swith_theme.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,61 +16,59 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ProductsController productsController = Get.find();
+
   @override
   void initState() {
-    context.read<ProductsCubit>().getAllProducts(isRefresh: false);
     super.initState();
+    // Load products on first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      productsController.getAllProducts();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
           "FakeStore",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
           ),
         ),
-        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         actions: [
+          ThemeSwitch(),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.black87),
+            icon: const Icon(Icons.search),
             onPressed: () {
-                context.read<ProductsCubit>().testError();
+              productsController.testError();
             },
           ),
           IconButton(
-            icon:
-                const Icon(Icons.shopping_bag_outlined, color: Colors.black87),
-            onPressed: () {
-              context.read<CategoryCubit>().getAllCategories(languageCode: "en");
-            },
+            icon: const Icon(Icons.shopping_bag_outlined),
+            onPressed: () {},
           ),
         ],
       ),
-      body: BlocBuilder<ProductsCubit, ProductsState>(
-        builder: (context, state) {
-          if (state is ProductsLoadingState) {
-            return _buildSkeletonLoader();
-          } else if (state is ProductsLoadedState) {
-            return _buildProductGrid(state.products);
-          } else if (state is ProductsErrorState) {
-            return CustomErrorWidget(
-              errorText: state.error,
-              onRetry: () {
-                context.read<ProductsCubit>().getAllProducts(isRefresh: false);
-              },
-            );
-          } else {
-            return CustomErrorWidget(errorText: "Something went wrong!");
-          }
-        },
-      ),
+      body: Obx(() {
+        if (productsController.isLoading.value) {
+          return _buildSkeletonLoader();
+        }
+
+        if (productsController.errorMessage.isNotEmpty) {
+          return CustomErrorWidget(
+            errorText: productsController.errorMessage.value,
+            onRetry: () {
+              productsController.getAllProducts();
+            },
+          );
+        }
+
+        return _buildProductGrid(productsController.products);
+      }),
     );
   }
 
@@ -95,69 +94,69 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductGrid(List<ProductModel> products) {
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
-      final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
-      final cardPadding = _getCardPadding(constraints.maxWidth);
-      final aspectRatio = _getAspectRatio(constraints.maxWidth);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
+        final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
+        final cardPadding = _getCardPadding(constraints.maxWidth);
+        final aspectRatio = _getAspectRatio(constraints.maxWidth);
 
-      return Container(
-        margin: EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: horizontalPadding,
-        ),
-        child: CustomRefreshIndicator(
-          onRefresh: () async {
-             context.read<ProductsCubit>().getAllProducts(isRefresh: true);
-          },
-          builder: (BuildContext context, Widget child, IndicatorController controller) {
-            return Stack(
-              alignment: Alignment.topCenter,
-              children: <Widget>[
-                // Your GridView
-                child,
+        return Container(
+          margin: EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: horizontalPadding,
+          ),
+          child: CustomRefreshIndicator(
+            onRefresh: () async {
+              await productsController.getAllProducts();
+            },
+            builder: (BuildContext context, Widget child,
+                IndicatorController controller) {
+              return Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  // Your GridView
+                  child,
 
-                // Refresh indicator
-                if (controller.isDragging || controller.isArmed)
-                  Positioned(
-                    top: 10,
-                    child: AnimatedBuilder(
-                      animation: controller,
-                      builder: (context, _) {
-                        return Transform.rotate(
-                          angle: controller.value * 2 * 3.14,
-                          child: const Icon(Icons.refresh, size: 28),
-                        );
-                      },
+                  // Refresh indicator
+                  if (controller.isDragging || controller.isArmed)
+                    Positioned(
+                      top: 10,
+                      child: AnimatedBuilder(
+                        animation: controller,
+                        builder: (context, _) {
+                          return Transform.rotate(
+                            angle: controller.value * 2 * 3.14,
+                            child: const Icon(Icons.refresh, size: 28),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-              ],
-            );
-          },
-          child: GridView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: aspectRatio,
-            ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              return _ProductCard(
-                product: products[index],
-                padding: cardPadding,
+                ],
               );
             },
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: aspectRatio,
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                return _ProductCard(
+                  product: products[index],
+                  padding: cardPadding,
+                );
+              },
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
-  // Helper methods for responsive values
   int _getCrossAxisCount(double screenWidth) {
     if (screenWidth > 1600) return 6;
     if (screenWidth > 1200) return 5;
@@ -206,12 +205,12 @@ class _ProductCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        side: BorderSide(color: context.borderColor, width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Navigate to product detail
+          // Navigate to product detail page (add Get.to or Navigator)
         },
         child: Padding(
           padding: padding,
@@ -223,6 +222,8 @@ class _ProductCard extends StatelessWidget {
                 child: Center(
                   child: product.image.isEmpty
                       ? Container(
+                          width: double.infinity,
+                          height: 150,
                           decoration: BoxDecoration(
                             color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(8),
@@ -251,7 +252,7 @@ class _ProductCard extends StatelessWidget {
                 ),
                 child: Text(
                   product.category.isEmpty
-                      ? ' '
+                      ? ''
                       : product.category.toUpperCase(),
                   style: const TextStyle(
                     fontSize: 10,
@@ -280,7 +281,7 @@ class _ProductCard extends StatelessWidget {
                 children: [
                   Text(
                     product.price == 0
-                        ? ' '
+                        ? ''
                         : '\$${product.price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
@@ -293,7 +294,7 @@ class _ProductCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         product.rating.rate == 0
-                            ? ' '
+                            ? ''
                             : product.rating.rate.toStringAsFixed(1),
                         style: const TextStyle(fontSize: 12),
                       ),

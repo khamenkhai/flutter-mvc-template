@@ -12,6 +12,7 @@ class AppColors {
   static const Color muted = Color(0xFFF1F5F9);
   static const Color mutedForeground = Color(0xFF64748B);
   static const Color backgroundColorLight = Colors.white;
+  static const Color borderColorLight = Color(0xFFE2E8F0);
 
   // Dark Theme Colors
   static const Color darkPrimary = Color(0xFF60A5FA);
@@ -21,6 +22,7 @@ class AppColors {
   static const Color darkMuted = Color(0xFF1E293B);
   static const Color darkMutedForeground = Color(0xFF94A3B8);
   static const Color backgroundColorDark = Color(0xFF020617);
+  static const Color borderColorDark = Color(0xFF334155);
 
   // Common Colors
   static const Color white = Colors.white;

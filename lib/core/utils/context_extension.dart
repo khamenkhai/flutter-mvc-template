@@ -29,6 +29,10 @@ extension ThemeContextExtension on BuildContext {
   Color get onSurface => Theme.of(this).colorScheme.onSurface;
   Color get onSurfaceVariant => Theme.of(this).colorScheme.onSurfaceVariant;
   Color get tertiary => Theme.of(this).colorScheme.tertiary;
+  // Border color based on theme mode
+  Color get borderColor => isDarkMode
+      ? const Color(0xFF334155) // dark border (slate700)
+      : const Color(0xFFE2E8F0);
 
   // Theme data shortcuts
   ThemeData get theme => Theme.of(this);

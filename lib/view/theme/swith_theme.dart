@@ -1,38 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:project_frame/controller/theme_cubit/theme_cubit.dart';
+import 'package:get/get.dart';
+import 'package:project_frame/controller/theme_controller.dart'; // adjust import path
 
 class ThemeSwitch extends StatelessWidget {
   const ThemeSwitch({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeCubit = context.read<ThemeCubit>();
+    final themeController = Get.find<ThemeController>();
 
-    return IconButton(
-      icon: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, state) {
-          // Determine which icon to show based on current theme mode
-          final icon = state.themeMode == ThemeMode.dark ||
-                  (state.themeMode == ThemeMode.system &&
-                      Theme.of(context).brightness == Brightness.dark)
-              ? const Icon(Icons.wb_sunny, key: Key('sun'))
-              : const Icon(Icons.nightlight_round, key: Key('moon'));
+    return Obx(() {
+      final isDark = themeController.themeMode.value == ThemeMode.dark ||
+          (themeController.themeMode.value == ThemeMode.system &&
+              MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return RotationTransition(
-                turns: Tween(begin: 0.5, end: 1.0).animate(animation),
-                child: ScaleTransition(scale: animation, child: child),
-              );
-            },
-            child: icon,
-          );
-        },
-      ),
-      onPressed: () => themeCubit.toggleTheme(),
-    );
+      final icon = isDark
+          ? const Icon(Icons.wb_sunny, key: ValueKey('sun_icon'))
+          : const Icon(Icons.nightlight_round, key: ValueKey('moon_icon'));
+
+      return IconButton(
+        icon: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) {
+            return RotationTransition(
+              turns: Tween(begin: 0.5, end: 1.0).animate(animation),
+              child: ScaleTransition(scale: animation, child: child),
+            );
+          },
+          child: icon,
+        ),
+        tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+        onPressed: () => themeController.toggleTheme(),
+      );
+    });
   }
 }
 
@@ -41,68 +41,83 @@ class SunMoonThemeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeCubit = context.read<ThemeCubit>();
+    final themeController = Get.find<ThemeController>();
 
-    return BlocBuilder<ThemeCubit, ThemeState>(
-      builder: (context, state) {
-        return PopupMenuButton<ThemeMode>(
-          icon: Icon(
-            state.themeMode == ThemeMode.system
-                ? Icons.settings_suggest_outlined
-                : state.themeMode == ThemeMode.light
-                    ? Icons.wb_sunny
-                    : Icons.nightlight_round,
+    return Obx(() {
+      IconData iconData;
+      Color? iconColor;
+
+      switch (themeController.themeMode.value) {
+        case ThemeMode.system:
+          iconData = Icons.settings_suggest_outlined;
+          iconColor = null;
+          break;
+        case ThemeMode.light:
+          iconData = Icons.wb_sunny;
+          iconColor = Colors.amber;
+          break;
+        case ThemeMode.dark:
+          iconData = Icons.nightlight_round;
+          iconColor = Colors.indigo;
+          break;
+      }
+
+      return PopupMenuButton<ThemeMode>(
+        icon: Icon(iconData, color: iconColor),
+        tooltip: 'Select Theme Mode',
+        onSelected: (mode) => themeController.setThemeMode(mode),
+        itemBuilder: (context) => [
+          _buildMenuItem(
+            context,
+            value: ThemeMode.system,
+            icon: Icons.settings_suggest_outlined,
+            text: 'System Theme',
+            selected: themeController.themeMode.value == ThemeMode.system,
           ),
-          onSelected: (mode) => themeCubit.setThemeMode(mode),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: ThemeMode.system,
-              child: Row(
-                children: [
-                  const Icon(Icons.settings_suggest_outlined),
-                  const SizedBox(width: 8),
-                  const Text('System Theme'),
-                  if (state.themeMode == ThemeMode.system)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Icon(Icons.check, size: 16),
-                    ),
-                ],
-              ),
+          _buildMenuItem(
+            context,
+            value: ThemeMode.light,
+            icon: Icons.wb_sunny,
+            iconColor: Colors.amber,
+            text: 'Light Mode',
+            selected: themeController.themeMode.value == ThemeMode.light,
+          ),
+          _buildMenuItem(
+            context,
+            value: ThemeMode.dark,
+            icon: Icons.nightlight_round,
+            iconColor: Colors.indigo,
+            text: 'Dark Mode',
+            selected: themeController.themeMode.value == ThemeMode.dark,
+          ),
+        ],
+      );
+    });
+  }
+
+  PopupMenuItem<ThemeMode> _buildMenuItem(
+    BuildContext context, {
+    required ThemeMode value,
+    required IconData icon,
+    Color? iconColor,
+    required String text,
+    required bool selected,
+  }) {
+    return PopupMenuItem<ThemeMode>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: iconColor),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
+          if (selected)
+            const Icon(
+              Icons.check,
+              size: 18,
+              color: Colors.green,
             ),
-            PopupMenuItem(
-              value: ThemeMode.light,
-              child: Row(
-                children: [
-                  const Icon(Icons.wb_sunny, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  const Text('Light Mode'),
-                  if (state.themeMode == ThemeMode.light)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Icon(Icons.check, size: 16),
-                    ),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: ThemeMode.dark,
-              child: Row(
-                children: [
-                  const Icon(Icons.nightlight_round, color: Colors.indigo),
-                  const SizedBox(width: 8),
-                  const Text('Dark Mode'),
-                  if (state.themeMode == ThemeMode.dark)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Icon(Icons.check, size: 16),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 }
