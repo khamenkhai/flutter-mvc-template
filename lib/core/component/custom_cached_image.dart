@@ -27,7 +27,7 @@ class CustomNetworkImage extends StatelessWidget {
       width: width ?? 100,
       height: height ?? 100,
       fit: fit,
-      placeholder: (context, url) => placeholder ?? const LoadingWidget(),
+      placeholder: (context, url) => Center(child: placeholder ?? const LoadingWidget()),
       errorWidget: (context, url, error) =>
           errorWidget ??
           const Center(

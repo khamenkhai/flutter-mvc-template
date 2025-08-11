@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:project_frame/controller/products_cubit/products_cubit.dart';
+import 'package:project_frame/core/component/custom_cached_image.dart';
 import 'package:project_frame/core/component/custom_error_widget.dart';
+import 'package:project_frame/core/component/internet_check.dart';
+import 'package:project_frame/core/service/local_noti_service.dart';
 import 'package:project_frame/models/response_models/product_model.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -13,9 +17,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  LocalNotificationService localNotificationService =
+      LocalNotificationService();
   @override
   void initState() {
     context.read<ProductsCubit>().getAllProducts(isRefresh: false);
+
+    localNotificationService.initializeLocalNotification();
     super.initState();
   }
 
@@ -37,7 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black87),
-            onPressed: () {},
+            onPressed: () {
+              localNotificationService
+                  .showNotification(title: "title", body: "test", payload: {});
+            },
           ),
           IconButton(
             icon:
@@ -46,23 +57,34 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<ProductsCubit, ProductsState>(
-        builder: (context, state) {
-          if (state is ProductsLoadingState) {
-            return _buildSkeletonLoader();
-          } else if (state is ProductsLoadedState) {
-            return _buildProductGrid(state.products);
-          } else if (state is ProductsErrorState) {
-            return CustomErrorWidget(
-              errorText: state.error,
-              onRetry: () {
-                context.read<ProductsCubit>().getAllProducts(isRefresh: false);
-              },
-            );
-          } else {
-            return CustomErrorWidget(errorText: "Something went wrong!");
-          }
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.push("/image-picker");
         },
+        child: Icon(Icons.image),
+      ),
+      body: ConnectionAwareWidget(
+        onRefresh: () {},
+        child: BlocBuilder<ProductsCubit, ProductsState>(
+          builder: (context, state) {
+            if (state is ProductsLoadingState) {
+              return _buildSkeletonLoader();
+            } else if (state is ProductsLoadedState) {
+              return _buildProductGrid(state.products);
+            } else if (state is ProductsErrorState) {
+              return CustomErrorWidget(
+                errorText: state.error,
+                onRetry: () {
+                  context
+                      .read<ProductsCubit>()
+                      .getAllProducts(isRefresh: false);
+                },
+              );
+            } else {
+              return CustomErrorWidget(errorText: "Something went wrong!");
+            }
+          },
+        ),
       ),
     );
   }
@@ -197,15 +219,15 @@ class _ProductCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         )
-                      : Image.network(
-                          product.image,
+                      : CustomNetworkImage(
+                          imageUrl: product.image,
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 48,
-                            color: Colors.grey,
-                          ),
+                          // errorBuilder: (context, error, stackTrace) =>
+                          //     const Icon(
+                          //   Icons.image_not_supported_outlined,
+                          //   size: 48,
+                          //   color: Colors.grey,
+                          // ),
                         ),
                 ),
               ),
